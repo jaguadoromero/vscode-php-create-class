@@ -1,0 +1,100 @@
+{
+  "name": "vscode-php-create-class",
+  "displayName": "PHP Create Class",
+  "description": "A Visual Studio Code extension for create Class / Interface / Trait from context menu in file explorer",
+  "version": "1.0.0",
+  "author": {
+    "name": "Juan Aguado",
+    "url": "https://github.com/jaguadoromero"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaguadoromero/vscode-php-create-class"
+  },
+  "homepage": "https://github.com/jaguadoromero/vscode-php-create-class/blob/master/README.md",
+  "engines": {
+    "vscode": "^1.56.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "publisher": "jaguadoromero",
+  "license": "MIT",
+  "icon": "icon.png",
+  "keywords": [
+    "php",
+    "create",
+    "class",
+    "interface",
+    "trait"
+  ],
+  "galleryBanner": {
+    "color": "#b2b5d7",
+    "theme": "light"
+  },
+  "activationEvents": [
+    "onCommand:phpCreateClass.createClass",
+    "onCommand:phpCreateClass.createInterface",
+    "onCommand:phpCreateClass.createTrait"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "phpCreateClass.createClass",
+        "category": "PHP",
+        "title": "New PHP Class"
+      },
+      {
+        "command": "phpCreateClass.createInterface",
+        "category": "PHP",
+        "title": "New PHP Interface"
+      },
+      {
+        "command": "phpCreateClass.createTrait",
+        "category": "PHP",
+        "title": "New PHP Trait"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "phpCreateClass.createClass",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@-1"
+        },
+        {
+          "command": "phpCreateClass.createInterface",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@-1"
+        },
+        {
+          "command": "phpCreateClass.createTrait",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@-1"
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.56.0",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "eslint": "^7.27.0",
+    "glob": "^7.1.7",
+    "mocha": "^8.4.0",
+    "typescript": "^4.3.2",
+    "vscode-test": "^1.5.2"
+  }
+}
