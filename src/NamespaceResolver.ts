@@ -56,7 +56,9 @@ export default class NamespaceResolver {
 
         relativePath += '/'
 
-        let resolved = relativePath.replace(namespaceMatches[0].path, namespaceMatches[0].prefix)
+        let resolved = relativePath
+            .replace(namespaceMatches[0].path, namespaceMatches[0].prefix)
+            .replace('/', '\\')
 
         return this.removeLastPathSeparator(resolved)
     }
