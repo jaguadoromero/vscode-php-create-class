@@ -29,8 +29,7 @@ export default class NamespaceResolver {
             return undefined
         }
         
-        const entries = {...composer.autoload["psr-4"] ?? {}, ...composer["autoload-dev"]["psr-4"] ?? {}}
-        const psr4Entries: Prs4Entries[] = this.collectPsr4Entries(entries)
+        const psr4Entries: Prs4Entries[] = this.collectPsr4Entries(composer)
         
         let namespaceMatches: NamespaceMatches[] = []
         for (const ns of psr4Entries) {
@@ -68,7 +67,7 @@ export default class NamespaceResolver {
 
         try {
             let root = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(folder))?.uri.fsPath
-            composerContent = await (await vscode.workspace.openTextDocument(root + path.sep + 'composer.json')).getText()
+            composerContent = (await vscode.workspace.openTextDocument(root + path.sep + 'composer.json')).getText()
         } catch (error) {
             vscode.window.showErrorMessage(this.msgCouldNotBeRead)
             return
@@ -77,18 +76,31 @@ export default class NamespaceResolver {
         return JSON.parse(composerContent)
     }
 
-    private collectPsr4Entries(entries: any) :Prs4Entries[] {
+    private collectPsr4Entries(composer: any) :Prs4Entries[] {
+        let autoloadEntries: {[key: string]: string} = {}
+
+        if (composer.hasOwnProperty("autoload") && composer.autoload.hasOwnProperty("psr-4")) {
+            autoloadEntries = composer.autoload["psr-4"]
+        }
+
+        let autoloadDevEntries: {[key: string]: string} = {}
+        if (composer.hasOwnProperty("autoload-dev") && composer["autoload-dev"].hasOwnProperty("psr-4")) {
+            autoloadDevEntries = composer["autoload-dev"]["psr-4"]
+        }
+
+        const entries = {...autoloadEntries, ...autoloadDevEntries}
+
         let psr4Entries: Prs4Entries[] = []
 
         for (const prefix in entries) {
-            const path = entries[prefix]
+            const entryPath = entries[prefix]
 
-            if (Array.isArray(path)) {
-                for (const prefixPath of path) {
+            if (Array.isArray(entryPath)) {
+                for (const prefixPath of entryPath) {
                     psr4Entries.push({prefix: prefix, path: prefixPath})
                 }
             } else {
-                psr4Entries.push({prefix, path})
+                psr4Entries.push({prefix: prefix, path: entryPath})
             }
         }
 
