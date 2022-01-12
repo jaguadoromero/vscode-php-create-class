@@ -24,7 +24,7 @@ export default class NamespaceResolver {
         }
 
         let composer = await this.composerContent(folder)
-        if (!composer || !composer.autoload) {
+        if (!composer) {
             vscode.window.showErrorMessage(this.msgCouldNotBeRead)
             return undefined
         }
@@ -39,7 +39,7 @@ export default class NamespaceResolver {
                 namespaceMatches.push({
                     path: ns.path,
                     prefix: ns.prefix,
-                    length: ns.path.length,
+                    length: ns.path.length
                 })
             }
         }
@@ -63,17 +63,17 @@ export default class NamespaceResolver {
     }
 
     private async composerContent(folder: string) {
-        let composerContent: string
+        let parsedContent: any
 
         try {
             let root = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(folder))?.uri.fsPath
-            composerContent = (await vscode.workspace.openTextDocument(root + path.sep + 'composer.json')).getText()
+            let composerContent:string = (await vscode.workspace.openTextDocument(root + path.sep + 'composer.json')).getText()
+            parsedContent = JSON.parse(composerContent)
         } catch (error) {
-            vscode.window.showErrorMessage(this.msgCouldNotBeRead)
-            return
+            return undefined
         }
 
-        return JSON.parse(composerContent)
+        return parsedContent
     }
 
     private collectPsr4Entries(composer: any) :Prs4Entries[] {
