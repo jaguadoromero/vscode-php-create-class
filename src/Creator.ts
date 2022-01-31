@@ -39,6 +39,13 @@ export default class Creator {
         }
 
         let filename = name.endsWith('.php') ? name : name + '.php'
+        
+        let space_index : int = filename.indexOf(' ');
+        if (space_index > 0) {
+            filename = filename.substring(0, space_index);
+        }
+
+        
         let fullFilename = folder.fsPath + path.sep + filename
 
         this.writeFile(type, name, fullFilename, namespace)
