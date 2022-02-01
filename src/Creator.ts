@@ -42,7 +42,7 @@ export default class Creator {
         
         let space_index: number = filename.indexOf(' ');
         if (space_index > 0) {
-            filename = filename.substring(0, space_index);
+            filename = filename.substring(0, space_index) + '.php';
         }
         
         let fullFilename = folder.fsPath + path.sep + filename
