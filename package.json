@@ -26,7 +26,8 @@
     "create",
     "class",
     "interface",
-    "trait"
+    "trait",
+    "enum"
   ],
   "galleryBanner": {
     "color": "#b2b5d7",
@@ -35,7 +36,8 @@
   "activationEvents": [
     "onCommand:phpCreateClass.createClass",
     "onCommand:phpCreateClass.createInterface",
-    "onCommand:phpCreateClass.createTrait"
+    "onCommand:phpCreateClass.createTrait",
+    "onCommand:phpCreateClass.createEnum"
   ],
   "main": "./out/extension.js",
   "scripts": {
@@ -62,6 +64,11 @@
         "command": "phpCreateClass.createTrait",
         "category": "PHP",
         "title": "New PHP Trait"
+      },
+      {
+        "command": "phpCreateClass.createEnum",
+        "category": "PHP",
+        "title": "New PHP Enum"
       }
     ],
     "menus": {
@@ -78,6 +85,11 @@
         },
         {
           "command": "phpCreateClass.createTrait",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@-1"
+        },
+        {
+          "command": "phpCreateClass.createEnum",
           "when": "explorerResourceIsFolder",
           "group": "navigation@-1"
         }
