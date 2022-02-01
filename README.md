@@ -1,6 +1,6 @@
 # Create PHP Class for Visual Studio Code
 
-A Visual Studio Code extension for create Class / Interface / Trait from context menu in file explorer.
+A Visual Studio Code extension for create Class / Interface / Trait / Enum from context menu in file explorer.
 
 The namespace is auto-resolved through `composer.json` file.
 
