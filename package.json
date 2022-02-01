@@ -1,7 +1,7 @@
 {
   "name": "vscode-php-create-class",
   "displayName": "PHP Create Class",
-  "description": "A Visual Studio Code extension for create Class / Interface / Trait from context menu in file explorer",
+  "description": "A Visual Studio Code extension for create Class / Interface / Trait / Enum from context menu in file explorer",
   "version": "1.2.2",
   "author": {
     "name": "Juan Aguado",
