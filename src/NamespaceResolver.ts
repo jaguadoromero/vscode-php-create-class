@@ -196,7 +196,11 @@ export default class NamespaceResolver {
 
             if(enti.path.length > 0)
             {
-                current_dir = composerdir + this.ootrim( enti.path, '/') + path.sep + enti.prefix.replace('\\', path.sep) + path.sep ;
+                current_dir = composerdir + this.ootrim( enti.path, '/') + path.sep;
+                if(enti.prefix.length > 0)
+                {
+                    current_dir += enti.prefix.replace('\\', path.sep) + path.sep ;
+                }
             } else
             {
                 current_dir =  composerdir ;
