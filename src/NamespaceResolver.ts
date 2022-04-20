@@ -53,8 +53,9 @@ export default class NamespaceResolver {
         }
 
         if (namespaceMatches.length == 0) {
-            vscode.window.showErrorMessage(this.msgNamespaceNotResolved)
-            return ''
+
+            const psr0Entries: Prs4Entries[] = this.collectPsr0Entries(composer)
+            return this.NameSparePathPsr0(folder, composerFilePath.slice(0, -13) , psr0Entries);
         }
 
         namespaceMatches.sort((a, b) => {
@@ -135,6 +136,81 @@ export default class NamespaceResolver {
         }
 
         return psr4Entries
+    }
+
+    private collectPsr0Entries(composer: any): Prs4Entries[] {
+        let autoloadEntries: { [key: string]: string } = {}
+
+        if (composer.hasOwnProperty("autoload") && composer.autoload.hasOwnProperty("psr-0")) {
+            autoloadEntries = composer.autoload["psr-0"]
+        }
+
+        let autoloadDevEntries: { [key: string]: string } = {}
+        if (composer.hasOwnProperty("autoload-dev") && composer["autoload-dev"].hasOwnProperty("psr-0")) {
+            autoloadDevEntries = composer["autoload-dev"]["psr-0"]
+        }
+
+        const entries = { ...autoloadEntries, ...autoloadDevEntries }
+
+        let psr4Entries: Prs4Entries[] = []
+
+        for (const prefix in entries) {
+            const entryPath = entries[prefix]
+
+            if (Array.isArray(entryPath)) {
+                for (const prefixPath of entryPath) {
+                    psr4Entries.push({ prefix: prefix, path: prefixPath })
+                }
+            } else {
+                psr4Entries.push({ prefix: prefix, path: entryPath })
+            }
+        }
+
+        return psr4Entries
+    }
+
+    private ootrim(str:string, char:string, type?:string):string
+    {
+          if (char) {
+    if (type == 'left') {
+      return str.replace(new RegExp('^\\'+char+'+', 'g'), '');
+    } else if (type == 'right') {
+      return str.replace(new RegExp('\\'+char+'+$', 'g'), '');
+    }
+    return str.replace(new RegExp('^\\'+char+'+|\\'+char+'+$', 'g'), '');
+  }
+  return str.replace(/^\s+|\s+$/g, '');
+
+    }
+
+
+    private NameSparePathPsr0(filePath :string, composerdir :string , Prs0ent :Prs4Entries []): string
+    {
+        let enti :Prs4Entries = {path:"",prefix:""};
+        let current_dir = "";
+
+        for (const entip in Prs0ent )
+        {
+            enti     = Prs0ent[ entip];
+            current_dir =  composerdir + enti.path ;
+            const srcIndex = filePath.indexOf(current_dir);
+
+            if (srcIndex == 0) {
+                 break;
+             }
+        }
+
+        let pathElements = filePath.slice(current_dir.length).trim().split(path.sep).join("\\").trim();
+        let slash       = "";
+
+        enti.prefix = this.ootrim(enti.prefix.trim(), '\\').trim();
+
+        if(enti.prefix.length > 0 && pathElements.length > 0)
+        {
+            slash = "\\";
+        }
+
+        return enti.prefix  + slash + pathElements;
     }
 
     private removeLastPathSeparator(nsPath: string): string {
