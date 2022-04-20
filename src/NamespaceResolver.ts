@@ -53,9 +53,9 @@ export default class NamespaceResolver {
         }
 
         if (namespaceMatches.length == 0) {
-
             const psr0Entries: Prs4Entries[] = this.collectPsr0Entries(composer)
-            return this.NameSparePathPsr0(folder, composerFilePath.slice(0, -13) , psr0Entries);
+
+            return this.NameSparePathPsr0(folder, composerFilePath.slice(0, -13), psr0Entries)
         }
 
         namespaceMatches.sort((a, b) => {
@@ -169,59 +169,52 @@ export default class NamespaceResolver {
         return psr4Entries
     }
 
-    private ootrim(str:string, char:string, type?:string):string
-    {
-          if (char) {
-    if (type == 'left') {
-      return str.replace(new RegExp('^\\'+char+'+', 'g'), '');
-    } else if (type == 'right') {
-      return str.replace(new RegExp('\\'+char+'+$', 'g'), '');
-    }
-    return str.replace(new RegExp('^\\'+char+'+|\\'+char+'+$', 'g'), '');
-  }
-  return str.replace(/^\s+|\s+$/g, '');
-
-    }
-
-
-    private NameSparePathPsr0(filePath :string, composerdir :string , Prs0ent :Prs4Entries []): string
-    {
-        let enti :Prs4Entries = {path:"",prefix:""};
-        let current_dir = "";
-
-        for (const entip in Prs0ent )
-        {
-            enti     = Prs0ent[ entip];
-            enti.prefix = this.ootrim(enti.prefix.trim(), '\\').trim();
-
-            if(enti.path.length > 0)
-            {
-                current_dir = composerdir + this.ootrim( enti.path, '/') + path.sep;
-                if(enti.prefix.length > 0)
-                {
-                    current_dir += enti.prefix.replace('\\', path.sep) + path.sep ;
-                }
-            } else
-            {
-                current_dir =  composerdir ;
+    private ootrim(str: string, char: string, type?: string): string {
+        if (char) {
+            if (type == 'left') {
+                return str.replace(new RegExp('^\\' + char + '+', 'g'), '')
+            } else if (type == 'right') {
+                return str.replace(new RegExp('\\' + char + '+$', 'g'), '')
             }
 
-            const srcIndex = filePath.indexOf(current_dir);
+            return str.replace(new RegExp('^\\' + char + '+|\\' + char + '+$', 'g'), '')
+        }
+
+        return str.replace(/^\s+|\s+$/g, '')
+    }
+
+    private NameSparePathPsr0(filePath: string, composerdir: string, Prs0ent: Prs4Entries[]): string {
+        let enti: Prs4Entries = { path: "", prefix: "" }
+        let current_dir = ""
+
+        for (const entip in Prs0ent) {
+            enti = Prs0ent[entip]
+            enti.prefix = this.ootrim(enti.prefix.trim(), '\\').trim()
+
+            if (enti.path.length > 0) {
+                current_dir = composerdir + this.ootrim(enti.path, '/') + path.sep
+                if (enti.prefix.length > 0) {
+                    current_dir += enti.prefix.replace('\\', path.sep) + path.sep
+                }
+            } else {
+                current_dir = composerdir
+            }
+
+            const srcIndex = filePath.indexOf(current_dir)
 
             if (srcIndex == 0) {
-                 break;
-             }
+                break
+            }
         }
 
-        let pathElements = filePath.slice(current_dir.length).trim().split(path.sep).join("\\").trim();
-        let slash       = "";
+        let pathElements = filePath.slice(current_dir.length).trim().split(path.sep).join("\\").trim()
+        let slash = ""
 
-        if(enti.prefix.length > 0 && pathElements.length > 0)
-        {
-            slash = "\\";
+        if (enti.prefix.length > 0 && pathElements.length > 0) {
+            slash = "\\"
         }
 
-        return enti.prefix  + slash + pathElements;
+        return enti.prefix + slash + pathElements
     }
 
     private removeLastPathSeparator(nsPath: string): string {
