@@ -7,6 +7,11 @@ interface Prs4Entries {
     path: string
 }
 
+interface Prs0Entries {
+    path: string
+}
+
+
 interface NamespaceMatches {
     path: string
     prefix: string
@@ -53,8 +58,9 @@ export default class NamespaceResolver {
         }
 
         if (namespaceMatches.length == 0) {
-            vscode.window.showErrorMessage(this.msgNamespaceNotResolved)
-            return ''
+
+            const psr0Entries: Prs0Entries[] = this.collectPsr0Entries(composer)
+            return this.NameSparePathPsr0(folder, psr0Entries);
         }
 
         namespaceMatches.sort((a, b) => {
@@ -135,6 +141,77 @@ export default class NamespaceResolver {
         }
 
         return psr4Entries
+    }
+
+    private collectPsr0Entries(composer: any): Prs0Entries[] {
+        let autoloadEntries: { [key: string]: string } = {}
+
+        if (composer.hasOwnProperty("autoload") && composer.autoload.hasOwnProperty("psr-0")) {
+            autoloadEntries = composer.autoload["psr-0"]
+        }
+
+        let autoloadDevEntries: { [key: string]: string } = {}
+        if (composer.hasOwnProperty("autoload-dev") && composer["autoload-dev"].hasOwnProperty("psr-0")) {
+            autoloadDevEntries = composer["autoload-dev"]["psr-0"]
+        }
+
+        const entries = { ...autoloadEntries, ...autoloadDevEntries }
+
+        let psr4Entries: Prs0Entries[] = []
+
+        for (const prefix in entries) {
+            const entryPath = entries[prefix]
+
+            if (Array.isArray(entryPath)) {
+                for (const prefixPath of entryPath) {
+                    psr4Entries.push({  path: this.ootrim( prefixPath, '/' ) })
+                }
+            } else {
+                psr4Entries.push({ path: this.ootrim( entryPath, '/' )})
+            }
+        }
+
+        return psr4Entries
+    }
+
+    private ootrim(str:string, char:string, type?:string):string
+    {
+          if (char) {
+    if (type == 'left') {
+      return str.replace(new RegExp('^\\'+char+'+', 'g'), '');
+    } else if (type == 'right') {
+      return str.replace(new RegExp('\\'+char+'+$', 'g'), '');
+    }
+    return str.replace(new RegExp('^\\'+char+'+|\\'+char+'+$', 'g'), '');
+  }
+  return str.replace(/^\s+|\s+$/g, '');
+
+    }
+
+    private NameSparePathPsr0(filePath :string, Prs0ent :Prs0Entries []): string
+    {
+
+        let pathElements = filePath.split(path.sep);
+
+        let indexAddition = 1;
+        let srcIndex      = 0;
+
+        for (const entip in Prs0ent )
+        {
+            const enti     = Prs0ent[ entip];
+            srcIndex = pathElements.lastIndexOf( enti.path );
+
+            if (srcIndex == -1) {
+                continue;
+             } else 
+             {
+                 break;
+             }
+        }
+
+        let namespaceElements = pathElements.slice(srcIndex + indexAddition );
+
+        return  namespaceElements.join("\\");
     }
 
     private removeLastPathSeparator(nsPath: string): string {
