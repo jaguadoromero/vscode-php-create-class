@@ -7,11 +7,6 @@ interface Prs4Entries {
     path: string
 }
 
-interface Prs0Entries {
-    path: string
-}
-
-
 interface NamespaceMatches {
     path: string
     prefix: string
@@ -59,8 +54,8 @@ export default class NamespaceResolver {
 
         if (namespaceMatches.length == 0) {
 
-            const psr0Entries: Prs0Entries[] = this.collectPsr0Entries(composer)
-            return this.NameSparePathPsr0(folder, psr0Entries);
+            const psr0Entries: Prs4Entries[] = this.collectPsr0Entries(composer)
+            return this.NameSparePathPsr0(folder, composerFilePath.slice(0, -13) , psr0Entries);
         }
 
         namespaceMatches.sort((a, b) => {
@@ -143,7 +138,7 @@ export default class NamespaceResolver {
         return psr4Entries
     }
 
-    private collectPsr0Entries(composer: any): Prs0Entries[] {
+    private collectPsr0Entries(composer: any): Prs4Entries[] {
         let autoloadEntries: { [key: string]: string } = {}
 
         if (composer.hasOwnProperty("autoload") && composer.autoload.hasOwnProperty("psr-0")) {
@@ -157,17 +152,17 @@ export default class NamespaceResolver {
 
         const entries = { ...autoloadEntries, ...autoloadDevEntries }
 
-        let psr4Entries: Prs0Entries[] = []
+        let psr4Entries: Prs4Entries[] = []
 
         for (const prefix in entries) {
             const entryPath = entries[prefix]
 
             if (Array.isArray(entryPath)) {
                 for (const prefixPath of entryPath) {
-                    psr4Entries.push({  path: this.ootrim( prefixPath, '/' ) })
+                    psr4Entries.push({ prefix: prefix, path: prefixPath })
                 }
             } else {
-                psr4Entries.push({ path: this.ootrim( entryPath, '/' )})
+                psr4Entries.push({ prefix: prefix, path: entryPath })
             }
         }
 
@@ -188,30 +183,34 @@ export default class NamespaceResolver {
 
     }
 
-    private NameSparePathPsr0(filePath :string, Prs0ent :Prs0Entries []): string
+
+    private NameSparePathPsr0(filePath :string, composerdir :string , Prs0ent :Prs4Entries []): string
     {
-
-        let pathElements = filePath.split(path.sep);
-
-        let indexAddition = 1;
-        let srcIndex      = 0;
+        let enti :Prs4Entries = {path:"",prefix:""};
+        let current_dir = "";
 
         for (const entip in Prs0ent )
         {
-            const enti     = Prs0ent[ entip];
-            srcIndex = pathElements.lastIndexOf( enti.path );
+            enti     = Prs0ent[ entip];
+            current_dir =  composerdir + enti.path ;
+            const srcIndex = filePath.indexOf(current_dir);
 
-            if (srcIndex == -1) {
-                continue;
-             } else 
-             {
+            if (srcIndex == 0) {
                  break;
              }
         }
 
-        let namespaceElements = pathElements.slice(srcIndex + indexAddition );
+        let pathElements = filePath.slice(current_dir.length).trim().split(path.sep).join("\\").trim();
+        let slash       = "";
 
-        return  namespaceElements.join("\\");
+        enti.prefix = this.ootrim(enti.prefix.trim(), '\\').trim();
+
+        if(enti.prefix.length > 0 && pathElements.length > 0)
+        {
+            slash = "\\";
+        }
+
+        return enti.prefix  + slash + pathElements;
     }
 
     private removeLastPathSeparator(nsPath: string): string {
