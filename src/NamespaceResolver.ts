@@ -7,12 +7,6 @@ interface Prs4Entries {
     path: string
 }
 
-interface NamespaceMatches {
-    path: string
-    prefix: string
-    length: number
-}
-
 export default class NamespaceResolver {
     readonly msgCouldNotBeRead = "The composer.json file could not be read"
     readonly msgNamespaceNotResolved = "The namespace could not be resolved"
@@ -37,39 +31,15 @@ export default class NamespaceResolver {
             return undefined
         }
 
-        const psr4Entries: Prs4Entries[] = this.collectPsr4Entries(composer)
+        const psr4Entries: Prs4Entries[] = this.collectPsr4Entries(composer, "psr-4")
+        const psr4namesp: string = this.NameSparePathPsr0(folder, composerFilePath.slice(0, -13), psr4Entries, 4)
 
-        let namespaceMatches: NamespaceMatches[] = []
-        for (const ns of psr4Entries) {
-            let nsPath = this.removeLastPathSeparator(ns.path)
-
-            if (relativePath.indexOf(nsPath) != -1) {
-                namespaceMatches.push({
-                    path: ns.path,
-                    prefix: ns.prefix,
-                    length: ns.path.length
-                })
-            }
+        if (psr4namesp == "") {
+            const psr0Entries: Prs4Entries[] = this.collectPsr4Entries(composer, "psr-0")
+            return this.NameSparePathPsr0(folder, composerFilePath.slice(0, -13), psr0Entries, 0)
         }
 
-        if (namespaceMatches.length == 0) {
-            const psr0Entries: Prs4Entries[] = this.collectPsr0Entries(composer)
-
-            return this.NameSparePathPsr0(folder, composerFilePath.slice(0, -13), psr0Entries)
-        }
-
-        namespaceMatches.sort((a, b) => {
-            return b.length - a.length
-        })
-
-        let finalFolder = path.join(folder, path.sep).replace(path.join(path.dirname(composerFilePath), path.sep), '')
-        let namespacePath = this.normalizeNamespacePath(namespaceMatches[0].path)
-
-        let resolved = finalFolder
-            .replace(namespacePath, namespaceMatches[0].prefix)
-            .replace(/\//g, '\\')
-
-        return this.removeLastPathSeparator(resolved)
+        return psr4namesp
     }
 
     private async composerContent(composerFilePath: string) {
@@ -107,53 +77,27 @@ export default class NamespaceResolver {
         return undefined
     }
 
-    private collectPsr4Entries(composer: any): Prs4Entries[] {
+    private collectPsr4Entries(composer: any, psr4or0: string): Prs4Entries[] {
         let autoloadEntries: { [key: string]: string } = {}
 
-        if (composer.hasOwnProperty("autoload") && composer.autoload.hasOwnProperty("psr-4")) {
-            autoloadEntries = composer.autoload["psr-4"]
+        if (composer.hasOwnProperty("autoload") && composer.autoload.hasOwnProperty(psr4or0)) {
+            autoloadEntries = composer.autoload[psr4or0]
         }
 
         let autoloadDevEntries: { [key: string]: string } = {}
-        if (composer.hasOwnProperty("autoload-dev") && composer["autoload-dev"].hasOwnProperty("psr-4")) {
-            autoloadDevEntries = composer["autoload-dev"]["psr-4"]
+        if (composer.hasOwnProperty("autoload-dev") && composer["autoload-dev"].hasOwnProperty(psr4or0)) {
+            autoloadDevEntries = composer["autoload-dev"][psr4or0]
         }
-
-        const entries = { ...autoloadEntries, ...autoloadDevEntries }
 
         let psr4Entries: Prs4Entries[] = []
 
-        for (const prefix in entries) {
-            const entryPath = entries[prefix]
-
-            if (Array.isArray(entryPath)) {
-                for (const prefixPath of entryPath) {
-                    psr4Entries.push({ prefix: prefix, path: prefixPath })
-                }
-            } else {
-                psr4Entries.push({ prefix: prefix, path: entryPath })
-            }
-        }
+        this.pushTolist(psr4Entries, autoloadEntries)
+        this.pushTolist(psr4Entries, autoloadDevEntries)
 
         return psr4Entries
     }
 
-    private collectPsr0Entries(composer: any): Prs4Entries[] {
-        let autoloadEntries: { [key: string]: string } = {}
-
-        if (composer.hasOwnProperty("autoload") && composer.autoload.hasOwnProperty("psr-0")) {
-            autoloadEntries = composer.autoload["psr-0"]
-        }
-
-        let autoloadDevEntries: { [key: string]: string } = {}
-        if (composer.hasOwnProperty("autoload-dev") && composer["autoload-dev"].hasOwnProperty("psr-0")) {
-            autoloadDevEntries = composer["autoload-dev"]["psr-0"]
-        }
-
-        const entries = { ...autoloadEntries, ...autoloadDevEntries }
-
-        let psr4Entries: Prs4Entries[] = []
-
+    private pushTolist(psr4Entries:Prs4Entries[], entries:{[key:string]: string}) {
         for (const prefix in entries) {
             const entryPath = entries[prefix]
 
@@ -165,8 +109,6 @@ export default class NamespaceResolver {
                 psr4Entries.push({ prefix: prefix, path: entryPath })
             }
         }
-
-        return psr4Entries
     }
 
     private ootrim(str: string, char: string, type?: string): string {
@@ -183,31 +125,39 @@ export default class NamespaceResolver {
         return str.replace(/^\s+|\s+$/g, '')
     }
 
-    private NameSparePathPsr0(filePath: string, composerdir: string, Prs0ent: Prs4Entries[]): string {
+    private NameSparePathPsr0(filePath: string, composerdir: string, Prs0ent: Prs4Entries[], prs:number): string {
         let enti: Prs4Entries = { path: "", prefix: "" }
-        let current_dir = ""
+        let current_dir:string = ""
+        let srcIndex:number    = -1
+
+        filePath    = this.ootrim(filePath, path.sep, "right") + path.sep
 
         for (const entip in Prs0ent) {
             enti = Prs0ent[entip]
             enti.prefix = this.ootrim(enti.prefix.trim(), '\\').trim()
+            enti.path   = this.checkEmptyPath( this.ootrim(enti.path, '/') )
 
             if (enti.path.length > 0) {
-                current_dir = composerdir + this.ootrim(enti.path, '/') + path.sep
-                if (enti.prefix.length > 0) {
-                    current_dir += enti.prefix.replace('\\', path.sep) + path.sep
+                current_dir = composerdir + enti.path + path.sep
+                if (enti.prefix.length > 0 && prs == 0) {
+                    current_dir += enti.prefix.split('\\').join(path.sep) + path.sep;
                 }
             } else {
                 current_dir = composerdir
             }
 
-            const srcIndex = filePath.indexOf(current_dir)
+            srcIndex = filePath.indexOf(current_dir)
 
             if (srcIndex == 0) {
                 break
             }
         }
 
-        let pathElements = filePath.slice(current_dir.length).trim().split(path.sep).join("\\").trim()
+        if(srcIndex == -1) {
+            return ""
+        }
+
+        let pathElements = this.ootrim( filePath,  path.sep, "right" ).slice(current_dir.length ).split(path.sep).join("\\").trim();
         let slash = ""
 
         if (enti.prefix.length > 0 && pathElements.length > 0) {
@@ -217,19 +167,16 @@ export default class NamespaceResolver {
         return enti.prefix + slash + pathElements
     }
 
-    private removeLastPathSeparator(nsPath: string): string {
-        if (nsPath.endsWith('/') || nsPath.endsWith('\\')) {
-            return nsPath.slice(0, -1)
+    private checkEmptyPath(path:string) {
+        path = this.ootrim( path.trim(), "./", 'left')
+        switch(path) {
+            case '.':
+            case '/':
+            case './':
+                return ""
+            default:
+                return path
         }
-
-        return nsPath
     }
 
-    private normalizeNamespacePath(nsPath: string): string {
-        if (!nsPath.endsWith('/')) {
-            nsPath += '/'
-        }
-
-        return nsPath.replace(/\//g, path.sep)
-    }
 }
