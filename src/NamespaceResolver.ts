@@ -13,12 +13,6 @@ export default class NamespaceResolver {
     readonly msgCouldNotBeFound = "The composer.json file could not be found"
 
     public async resolve(folder: string): Promise<string | undefined> {
-        let relativePath = vscode.workspace.asRelativePath(folder)
-
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders?.length > 1) {
-            relativePath = relativePath.split('/').slice(1).join('/')
-        }
-
         let composerFilePath = this.findComposerFile(folder)
         if (!composerFilePath) {
             vscode.window.showErrorMessage(this.msgCouldNotBeFound)
