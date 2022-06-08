@@ -58,6 +58,8 @@ export default class Creator {
 
         let content = "<?php\n"
         content += "\n"
+        content += "declare(strict_types=1);"
+        content += "\n"
         content += "namespace " + namespace + ";\n"
         content += "\n"
         content += type + " " + name + "\n"
