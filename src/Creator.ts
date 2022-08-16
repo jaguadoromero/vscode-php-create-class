@@ -2,7 +2,6 @@ import * as vscode from 'vscode'
 import * as fs from 'fs'
 import NamespaceResolver from './NamespaceResolver'
 import path = require('path')
-
 export default class Creator {
     readonly msgFileExists = "File already exists!"
 
@@ -34,15 +33,15 @@ export default class Creator {
         let namespaceResolver: NamespaceResolver = new NamespaceResolver()
         let namespace = await namespaceResolver.resolve(folder.fsPath)
 
-        if (namespace == undefined) {
+        if (namespace === undefined) {
             return
         }
 
         let filename = name.endsWith('.php') ? name : name + '.php'
         
-        let space_index: number = filename.indexOf(' ');
+        let space_index: number = filename.indexOf(' ')
         if (space_index > 0) {
-            filename = filename.substring(0, space_index) + '.php';
+            filename = filename.substring(0, space_index) + '.php'
         }
         
         let fullFilename = folder.fsPath + path.sep + filename
@@ -57,6 +56,12 @@ export default class Creator {
         }
 
         let content = "<?php\n"
+
+        if(vscode.workspace.getConfiguration("phpCreateClass").get("strict_types")) {
+            content += "\n"
+            content += "declare(strict_types=1);\n"
+        }
+
         content += "\n"
         content += "namespace " + namespace + ";\n"
         content += "\n"
