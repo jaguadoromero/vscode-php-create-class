@@ -54,7 +54,9 @@ export default class Creator {
             vscode.window.showErrorMessage(this.msgFileExists)
             return
         }
-
+    
+        name = name.replace(/\.php+$/g, "")
+        
         let content = "<?php\n"
 
         if(vscode.workspace.getConfiguration("phpCreateClass").get("strict_types")) {
