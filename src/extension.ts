@@ -13,6 +13,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createInterface)
     context.subscriptions.push(createTrait)
     context.subscriptions.push(createEnum)
+
+    vscode.commands.executeCommand('setContext', 'phpCreateClass.activated', true);
 }
 
 export function deactivate() {}

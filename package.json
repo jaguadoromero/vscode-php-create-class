@@ -34,10 +34,7 @@
     "theme": "light"
   },
   "activationEvents": [
-    "onCommand:phpCreateClass.createClass",
-    "onCommand:phpCreateClass.createInterface",
-    "onCommand:phpCreateClass.createTrait",
-    "onCommand:phpCreateClass.createEnum"
+    "workspaceContains:/composer.json"
   ],
   "main": "./out/extension.js",
   "scripts": {
@@ -75,22 +72,22 @@
       "explorer/context": [
         {
           "command": "phpCreateClass.createClass",
-          "when": "explorerResourceIsFolder",
+          "when": "explorerResourceIsFolder && phpCreateClass.activated",
           "group": "navigation@-1"
         },
         {
           "command": "phpCreateClass.createInterface",
-          "when": "explorerResourceIsFolder",
+          "when": "explorerResourceIsFolder && phpCreateClass.activated",
           "group": "navigation@-1"
         },
         {
           "command": "phpCreateClass.createTrait",
-          "when": "explorerResourceIsFolder",
+          "when": "explorerResourceIsFolder && phpCreateClass.activated",
           "group": "navigation@-1"
         },
         {
           "command": "phpCreateClass.createEnum",
-          "when": "explorerResourceIsFolder",
+          "when": "explorerResourceIsFolder && phpCreateClass.activated",
           "group": "navigation@-1"
         }
       ]
