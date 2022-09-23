@@ -59,7 +59,7 @@ export default class Creator {
         
         let content = "<?php\n"
 
-        if(vscode.workspace.getConfiguration("phpCreateClass").get("strict_types")) {
+        if(vscode.workspace.getConfiguration("phpCreateClass").get("strictTypes")) {
             content += "\n"
             content += "declare(strict_types=1);\n"
         }

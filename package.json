@@ -99,10 +99,10 @@
       "type": "object",
       "title": "PHP Create Class",
       "properties": {
-        "phpCreateClass.strict_types": {
+        "phpCreateClass.strictTypes": {
           "type": "boolean",
           "default": false,
-          "description": "Set strict_types directive when creating a file"
+          "markdownDescription": "Set `strict_types` directive when creating a file"
         }
       }
     }
