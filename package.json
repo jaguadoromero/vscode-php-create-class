@@ -100,8 +100,13 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Set `strict_types` directive when creating a file"
+        },
+        "phpCreateClass.finalClass": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Set `final` modifier when creating a class"
         }
-      }
+      } 
     }
   },
   "devDependencies": {

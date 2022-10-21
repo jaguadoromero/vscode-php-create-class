@@ -67,7 +67,17 @@ export default class Creator {
         content += "\n"
         content += "namespace " + namespace + ";\n"
         content += "\n"
-        content += type + " " + name + "\n"
+		
+		if(vscode.workspace.getConfiguration("phpCreateClass").get("finalClass") && type === "class") {
+
+            content += "final" + " " + type + " " + name + "\n";
+
+        }else{
+
+            content += type + " " + name + "\n";
+
+        }
+		
         content += "{\n\n}\n"
 
         fs.writeFileSync(filename, content)
