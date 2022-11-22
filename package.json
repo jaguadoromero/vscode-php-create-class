@@ -34,7 +34,7 @@
     "theme": "light"
   },
   "activationEvents": [
-    "workspaceContains:/composer.json"
+    "workspaceContains:**/composer.json"
   ],
   "main": "./out/extension.js",
   "scripts": {
