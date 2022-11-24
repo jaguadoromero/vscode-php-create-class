@@ -4,6 +4,7 @@ import NamespaceResolver from './NamespaceResolver'
 import path = require('path')
 export default class Creator {
     readonly msgFileExists = "File already exists!"
+    readonly msgMustOpenFile = 'You must open a file to generate code'
 
     public async createFile(type: string, folder: any) {
         if (!folder) {
@@ -49,8 +50,26 @@ export default class Creator {
         this.writeFile(type, name, fullFilename, namespace)
     }
 
-    private writeFile(type: string, name: string, filename: string, namespace: string): void {
-        if (fs.existsSync(filename)) {
+    public async generateCode(type: string) {
+        const currentFile  = vscode.window.activeTextEditor?.document.fileName
+        
+        if (!currentFile) {
+            vscode.window.showErrorMessage(this.msgMustOpenFile)
+            return
+        }
+
+        let namespaceResolver: NamespaceResolver = new NamespaceResolver()
+        let namespace = await namespaceResolver.resolve(path.dirname(currentFile))
+
+        if (namespace === undefined) {
+            return
+        }
+        
+        this.writeFile(type, path.basename(currentFile), currentFile, namespace, true)
+    }
+
+    private writeFile(type: string, name: string, filename: string, namespace: string, overwrite: boolean = false): void {
+        if (fs.existsSync(filename) && !overwrite) {
             vscode.window.showErrorMessage(this.msgFileExists)
             return
         }

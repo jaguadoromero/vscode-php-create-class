@@ -66,6 +66,26 @@
         "command": "phpCreateClass.createEnum",
         "category": "PHP",
         "title": "New PHP Enum"
+      },
+      {
+        "command": "phpCreateClass.generateClassCode",
+        "category": "PHP",
+        "title": "Generate Class code"
+      },
+      {
+        "command": "phpCreateClass.generateInterfaceCode",
+        "category": "PHP",
+        "title": "Generate Interface code"
+      },
+      {
+        "command": "phpCreateClass.generateTraitCode",
+        "category": "PHP",
+        "title": "Generate Trait code"
+      },
+      {
+        "command": "phpCreateClass.generateEnumCode",
+        "category": "PHP",
+        "title": "Generate Enum code"
       }
     ],
     "menus": {
