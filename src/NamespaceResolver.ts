@@ -81,6 +81,7 @@ export default class NamespaceResolver {
 
         let resolved = finalFolder
             .replace(pathMatches[0].path, pathMatches[0].prefix)
+            .replace(/\//g, '\\');
 
         return this.removeLastPathSeparator(resolved);
     }
