@@ -45,9 +45,10 @@ export default class NamespaceResolver {
         let pathMatches: PathMatches[] = []
 
         for (const entry of psrEntries) {
-            let nsPath = this.removeLastPathSeparator(entry.path);
+            const pathNoLastSlash = this.removeLastPathSeparator(entry.path)
+            entry.path = this.ensurePathEndsWithSlash(entry.path)
 
-            if (relativePath.indexOf(nsPath) != -1) {
+            if (relativePath.indexOf(pathNoLastSlash) != -1) {
                 if (entry.type == 'psr-0' && entry.ns == '') {
                     entry.ns = relativePath
                         .replace(entry.path, '')
@@ -56,7 +57,7 @@ export default class NamespaceResolver {
                 }
 
                 pathMatches.push({
-                    path: entry.path,
+                    path: this.ensurePathEndsWithSlash(entry.path),
                     prefix: this.ensureNamespaceEndsWithDoubleBackslash(entry.ns),
                     length: entry.path.length,
                     priority: entry.type == 'psr-4' ? 1 : 0
