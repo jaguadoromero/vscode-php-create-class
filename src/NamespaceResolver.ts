@@ -21,23 +21,18 @@ export default class NamespaceResolver {
     readonly msgCouldNotBeFound = "The composer.json file could not be found"
 
     public async resolve(folder: string): Promise<string | undefined> {
-        let relativePath = vscode.workspace.asRelativePath(folder)
+        const {composerFolder, composerPath, composerFound} = this.findComposerFile(folder)
 
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders?.length > 1) {
-            relativePath = relativePath.split('/').slice(1).join('/')
-        }
-
-        let composerFilePath = this.findComposerFile(folder)
-        
-        if (!composerFilePath) {
-            vscode.window.showErrorMessage(this.msgCouldNotBeFound)
+        if (!composerFound) {
+            await vscode.window.showErrorMessage(this.msgCouldNotBeFound)
             return undefined
         }
 
-        let composer = await this.composerContent(composerFilePath)
+        let relativePath = folder.replace(composerFolder, '')
+        let composer = await this.composerContent(composerPath)
 
         if (!composer) {
-            vscode.window.showErrorMessage(this.msgCouldNotBeRead)
+            await vscode.window.showErrorMessage(this.msgCouldNotBeRead)
             return undefined
         }
 
@@ -66,7 +61,7 @@ export default class NamespaceResolver {
         }
 
         if (pathMatches.length == 0) {
-            vscode.window.showErrorMessage(this.msgNamespaceNotResolved);
+            await vscode.window.showErrorMessage(this.msgNamespaceNotResolved);
             return '';
         }
 
@@ -120,30 +115,34 @@ export default class NamespaceResolver {
         }
     }
 
-    private findComposerFile(folder: string): string | undefined {
+    private findComposerFile(folder: string): any {
         let workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(folder))?.uri.fsPath
         let segments = folder.split(path.sep)
 
         let walking = true
 
         do {
-            const fullPath = segments.join(path.sep)
+            const composerFolder = segments.join(path.sep)
 
             try {
-                const composerPath = path.join(fullPath, 'composer.json')
+                const composerPath = path.join(composerFolder, 'composer.json')
                 statSync(composerPath)
 
-                return composerPath
+                return {
+                    composerFolder: this.ensurePathEndsWithSlash(composerFolder), 
+                    composerPath, 
+                    composerFound: true
+                }
             } catch {
                 segments.pop()
             }
 
-            if (fullPath == workspaceFolder) {
+            if (composerFolder == workspaceFolder) {
                 walking = false
             }
         } while (walking)
 
-        return undefined
+        return {composerFound: false}
     }
 
     private collectPsrEntries(composer: any): PsrEntry[] {
@@ -163,10 +162,10 @@ export default class NamespaceResolver {
 
                 for (let ns in composer[autoload][psr]) {
                     let path  = composer[autoload][psr][ns];
-
+                    path = this.ensurePathEndsWithSlash(path)
                     
                     if (psr == 'psr-0') {
-                        path += '/' + ns.replace(/\\/g, "/");
+                        path += ns.replace(/\\/g, "/");
                     } 
 
                     psrEntries.push({
