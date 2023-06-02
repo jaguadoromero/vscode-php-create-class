@@ -28,7 +28,10 @@ export default class NamespaceResolver {
             return undefined
         }
 
-        let relativePath = folder.replace(composerFolder, '')
+        let relativePath = folder
+            .replace(composerFolder, '')
+            .replace(/\\/g, '/');
+
         let composer = await this.composerContent(composerPath)
 
         if (!composer) {
@@ -106,6 +109,14 @@ export default class NamespaceResolver {
         return path;
     }
 
+    private ensureEndsWithSystemSeparator(folder: string): string {
+        if (!folder.endsWith(path.sep)) {
+            folder += path.sep;
+        }
+
+        return folder;
+    }
+
     private async composerContent(composerFilePath: string) {
         try {
             let composerContent: string = (await vscode.workspace.openTextDocument(composerFilePath)).getText()
@@ -129,7 +140,7 @@ export default class NamespaceResolver {
                 statSync(composerPath)
 
                 return {
-                    composerFolder: this.ensurePathEndsWithSlash(composerFolder), 
+                    composerFolder: this.ensureEndsWithSystemSeparator(composerFolder),
                     composerPath, 
                     composerFound: true
                 }
