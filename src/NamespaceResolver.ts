@@ -28,10 +28,6 @@ export default class NamespaceResolver {
             return undefined
         }
 
-        let relativePath = folder
-            .replace(composerFolder, '')
-            .replace(/\\/g, '/');
-
         let composer = await this.composerContent(composerPath)
 
         if (!composer) {
@@ -41,23 +37,18 @@ export default class NamespaceResolver {
 
         const psrEntries: PsrEntry[] = this.collectPsrEntries(composer);
         let pathMatches: PathMatches[] = []
-
+        
         for (const entry of psrEntries) {
             const pathNoLastSlash = this.removeLastPathSeparator(entry.path)
             entry.path = this.ensurePathEndsWithSlash(entry.path)
 
-            if (relativePath.indexOf(pathNoLastSlash) != -1) {
-                if (entry.type == 'psr-0' && entry.ns == '') {
-                    entry.ns = relativePath
-                        .replace(entry.path, '')
-                        .replace(/\//g, '\\');
-                    entry.path = relativePath + '/';
-                }
+            const resolvedPath = path.resolve(composerFolder, pathNoLastSlash);
 
+            if (folder.indexOf(resolvedPath) != -1) {
                 pathMatches.push({
-                    path: this.ensurePathEndsWithSlash(entry.path),
-                    prefix: this.ensureNamespaceEndsWithDoubleBackslash(entry.ns),
-                    length: entry.path.length,
+                    path: this.ensurePathEndsWithSlash(resolvedPath),
+                    prefix: this.normalizeNamespace(entry.ns),
+                    length: resolvedPath.length,
                     priority: entry.type == 'psr-4' ? 1 : 0
                 })
             }
@@ -76,7 +67,7 @@ export default class NamespaceResolver {
             return b.priority - a.priority
         })
 
-        const finalFolder = this.ensurePathEndsWithSlash(relativePath);
+        const finalFolder = this.ensurePathEndsWithSlash(folder);
 
         let resolved = finalFolder
             .replace(pathMatches[0].path, pathMatches[0].prefix)
@@ -93,9 +84,13 @@ export default class NamespaceResolver {
         return nsPath
     }
 
-    private ensureNamespaceEndsWithDoubleBackslash(ns: string): string {
+    private normalizeNamespace(ns: string): string {
         if (!ns.endsWith('\\')) {
             ns += '\\';
+        }
+
+        if (ns.startsWith('/') || ns.startsWith('\\')) {
+            ns = ns.slice(1);
         }
 
         return ns;
@@ -127,9 +122,15 @@ export default class NamespaceResolver {
     }
 
     private findComposerFile(folder: string): any {
-        let workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(folder))?.uri.fsPath
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(folder))?.uri.fsPath as string;
+        const composerFilePath = vscode.workspace.getConfiguration("phpCreateClass").get("composerFilePath") as string;
+        
+        if (composerFilePath !== '') {
+            return this.parseComposerFilePath(composerFilePath, workspaceFolder);
+        }
+        
+        
         let segments = folder.split(path.sep)
-
         let walking = true
 
         do {
@@ -174,10 +175,6 @@ export default class NamespaceResolver {
                 for (let ns in composer[autoload][psr]) {
                     let path  = composer[autoload][psr][ns];
                     path = this.ensurePathEndsWithSlash(path)
-                    
-                    if (psr == 'psr-0') {
-                        path += ns.replace(/\\/g, "/");
-                    } 
 
                     psrEntries.push({
                         ns: ns,
@@ -189,5 +186,18 @@ export default class NamespaceResolver {
         }
 
         return psrEntries;
+    }
+
+    private parseComposerFilePath(composerFilePath: string, workspaceFolder: string): any {
+        const folder = path.join(workspaceFolder || '', composerFilePath);
+        const parsedPath = path.parse(folder);
+
+        if (parsedPath.ext === '.json') {
+            return {
+                composerFolder: this.ensureEndsWithSystemSeparator(path.dirname(folder)),
+                composerPath: folder,
+                composerFound: true
+            };
+        }
     }
 }

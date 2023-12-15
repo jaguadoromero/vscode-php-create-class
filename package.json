@@ -125,6 +125,11 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Set `final` modifier when creating a class"
+        },
+        "phpCreateClass.composerFilePath": {
+          "type": "string",
+          "default": null,
+          "markdownDescription": "Set `composer.json` location path (relative to project root folder)"
         }
       }
     }

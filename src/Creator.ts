@@ -84,8 +84,11 @@ export default class Creator {
         }
 
         content += "\n"
-        content += "namespace " + namespace + ";\n"
-        content += "\n"
+
+        if (namespace !== '') {
+            content += "namespace " + namespace + ";\n"
+            content += "\n"
+        }
 		
 		if(vscode.workspace.getConfiguration("phpCreateClass").get("finalClass") && type === "class") {
 
