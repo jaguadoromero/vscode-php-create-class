@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
-import { statSync } from 'fs'
+import { statSync, existsSync } from 'fs'
 
 interface PsrEntry {
     ns: string
@@ -191,13 +191,26 @@ export default class NamespaceResolver {
     private parseComposerFilePath(composerFilePath: string, workspaceFolder: string): any {
         const folder = path.join(workspaceFolder || '', composerFilePath);
         const parsedPath = path.parse(folder);
+        const composerFolder = this.ensureEndsWithSystemSeparator(folder);
 
         if (parsedPath.ext === '.json') {
             return {
-                composerFolder: this.ensureEndsWithSystemSeparator(path.dirname(folder)),
+                composerFolder,
                 composerPath: folder,
                 composerFound: true
             };
         }
+
+        const filePath = path.join(folder, 'composer.json');
+
+        if (!existsSync(filePath)) {
+            return {composerFound: false};
+        }
+
+        return {
+            composerFolder,
+            composerPath: filePath,
+            composerFound: true
+        };
     }
 }
