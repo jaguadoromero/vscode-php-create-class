@@ -125,7 +125,7 @@ export default class NamespaceResolver {
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(folder))?.uri.fsPath as string;
         const composerFilePath = vscode.workspace.getConfiguration("phpCreateClass").get("composerFilePath") as string;
         
-        if (composerFilePath !== '') {
+        if (composerFilePath !== null && composerFilePath !== '') {
             return this.parseComposerFilePath(composerFilePath, workspaceFolder);
         }
         
@@ -191,11 +191,10 @@ export default class NamespaceResolver {
     private parseComposerFilePath(composerFilePath: string, workspaceFolder: string): any {
         const folder = path.join(workspaceFolder || '', composerFilePath);
         const parsedPath = path.parse(folder);
-        const composerFolder = this.ensureEndsWithSystemSeparator(folder);
 
         if (parsedPath.ext === '.json') {
             return {
-                composerFolder,
+                composerFolder: this.ensureEndsWithSystemSeparator(path.dirname(folder)),
                 composerPath: folder,
                 composerFound: true
             };
@@ -208,7 +207,7 @@ export default class NamespaceResolver {
         }
 
         return {
-            composerFolder,
+            composerFolder: this.ensureEndsWithSystemSeparator(folder),
             composerPath: filePath,
             composerFound: true
         };
