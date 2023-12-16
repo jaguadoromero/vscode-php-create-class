@@ -50,22 +50,22 @@
       {
         "command": "phpCreateClass.createClass",
         "category": "PHP",
-        "title": "New PHP Class"
+        "title": "New Class"
       },
       {
         "command": "phpCreateClass.createInterface",
         "category": "PHP",
-        "title": "New PHP Interface"
+        "title": "New Interface"
       },
       {
         "command": "phpCreateClass.createTrait",
         "category": "PHP",
-        "title": "New PHP Trait"
+        "title": "New Trait"
       },
       {
         "command": "phpCreateClass.createEnum",
         "category": "PHP",
-        "title": "New PHP Enum"
+        "title": "New Enum"
       },
       {
         "command": "phpCreateClass.generateClassCode",
@@ -88,27 +88,39 @@
         "title": "Generate Enum code"
       }
     ],
+    "submenus": [
+      {
+        "id": "phpCreateClass.menu",
+        "label": "New PHP file..."
+      }
+    ],
     "menus": {
       "explorer/context": [
         {
+          "submenu": "phpCreateClass.menu",
+          "group": "navigation@-1"
+        }
+      ],
+      "phpCreateClass.menu": [
+        {
           "command": "phpCreateClass.createClass",
           "when": "explorerResourceIsFolder && phpCreateClass.activated",
-          "group": "navigation@-1"
+          "group": "phpCreateClass"
         },
         {
           "command": "phpCreateClass.createInterface",
           "when": "explorerResourceIsFolder && phpCreateClass.activated",
-          "group": "navigation@-1"
+          "group": "phpCreateClass"
         },
         {
           "command": "phpCreateClass.createTrait",
           "when": "explorerResourceIsFolder && phpCreateClass.activated",
-          "group": "navigation@-1"
+          "group": "phpCreateClass"
         },
         {
           "command": "phpCreateClass.createEnum",
           "when": "explorerResourceIsFolder && phpCreateClass.activated",
-          "group": "navigation@-1"
+          "group": "phpCreateClass"
         }
       ]
     },
