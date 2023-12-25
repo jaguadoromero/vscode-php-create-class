@@ -46,7 +46,7 @@ export default class NamespaceResolver {
 
             if (folder.indexOf(resolvedPath) != -1) {
                 pathMatches.push({
-                    path: this.ensurePathEndsWithSlash(resolvedPath),
+                    path: this.ensureEndsWithSystemSeparator(resolvedPath),
                     prefix: this.normalizeNamespace(entry.ns),
                     length: resolvedPath.length,
                     priority: entry.type == 'psr-4' ? 1 : 0
