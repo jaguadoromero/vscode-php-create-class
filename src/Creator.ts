@@ -34,10 +34,6 @@ export default class Creator {
         let namespaceResolver: NamespaceResolver = new NamespaceResolver()
         let namespace = await namespaceResolver.resolve(folder.fsPath)
 
-        if (namespace === undefined) {
-            return
-        }
-
         let filename = name.endsWith('.php') ? name : name + '.php'
         
         let space_index: number = filename.indexOf(' ')
@@ -68,7 +64,7 @@ export default class Creator {
         this.writeFile(type, path.basename(currentFile), currentFile, namespace, true)
     }
 
-    private writeFile(type: string, name: string, filename: string, namespace: string, overwrite: boolean = false): void {
+    private writeFile(type: string, name: string, filename: string, namespace: string|undefined, overwrite: boolean = false): void {
         if (fs.existsSync(filename) && !overwrite) {
             vscode.window.showErrorMessage(this.msgFileExists)
             return
@@ -85,7 +81,7 @@ export default class Creator {
 
         content += "\n"
 
-        if (namespace !== '') {
+        if (namespace !== '' && namespace !== undefined) {
             content += "namespace " + namespace + ";\n"
             content += "\n"
         }

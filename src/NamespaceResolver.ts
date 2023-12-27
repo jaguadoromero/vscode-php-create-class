@@ -67,7 +67,7 @@ export default class NamespaceResolver {
             return b.priority - a.priority
         })
 
-        const finalFolder = this.ensurePathEndsWithSlash(folder);
+        const finalFolder = this.ensureEndsWithSystemSeparator(folder);
 
         let resolved = finalFolder
             .replace(pathMatches[0].path, pathMatches[0].prefix)
