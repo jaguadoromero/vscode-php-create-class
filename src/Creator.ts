@@ -36,9 +36,9 @@ export default class Creator {
 
         let filename = name.endsWith('.php') ? name : name + '.php'
         
-        let space_index: number = filename.indexOf(' ')
-        if (space_index > 0) {
-            filename = filename.substring(0, space_index) + '.php'
+        let spaceIndex: number = filename.indexOf(' ')
+        if (spaceIndex > 0) {
+            filename = filename.substring(0, spaceIndex) + '.php'
         }
         
         let fullFilename = folder.fsPath + path.sep + filename
